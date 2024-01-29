@@ -1,0 +1,7 @@
+"D:\APP\CLion 2022.2.4\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" -S C:\Users\Yezi\Desktop\Games101Homeworks -B C:\Users\Yezi\Desktop\Games101Homeworks\cmake-build-debug
+CMake Error at CMakeLists.txt:1 (cmake_minimum_required):
+  CMake 3.27 or higher is required.  You are running version 3.23.2
+
+
+-- Configuring incomplete, errors occurred!
+See also "C:/Users/Yezi/Desktop/Games101Homeworks/cmake-build-debug/CMakeFiles/CMakeOutput.log".
