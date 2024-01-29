@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/v_maolinye/CLionProjects/GAMES101
+# Install script for directory: C:/Users/v_maolinye/CLionProjects/Games101Homeworks
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/GAMES101")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Transformation")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/v_maolinye/CLionProjects/GAMES101/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/v_maolinye/CLionProjects/Games101Homeworks/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
