@@ -1,3 +1,3 @@
-C:/Users/v_maolinye/CLionProjects/Games101Homeworks/cmake-build-debug/CMakeFiles/Transformation.dir
+C:/Users/v_maolinye/CLionProjects/Games101Homeworks/cmake-build-debug/CMakeFiles/Rasterizer.dir
 C:/Users/v_maolinye/CLionProjects/Games101Homeworks/cmake-build-debug/CMakeFiles/edit_cache.dir
 C:/Users/v_maolinye/CLionProjects/Games101Homeworks/cmake-build-debug/CMakeFiles/rebuild_cache.dir
