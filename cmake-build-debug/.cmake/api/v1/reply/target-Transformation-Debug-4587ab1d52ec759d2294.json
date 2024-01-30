@@ -45,14 +45,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g"
+					"fragment" : "-g -fdiagnostics-color=always"
 				}
 			],
 			"includes" : 
 			[
 				{
 					"backtrace" : 2,
-					"path" : "C:/Users/Yezi/Desktop/Games101Homeworks/eigen3"
+					"path" : "C:/Users/v_maolinye/CLionProjects/Games101Homeworks/eigen3"
 				}
 			],
 			"language" : "CXX",
