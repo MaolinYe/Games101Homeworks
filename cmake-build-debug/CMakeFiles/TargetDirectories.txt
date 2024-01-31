@@ -1,3 +1,0 @@
-C:/Users/Yezi/Desktop/Games101Homeworks/cmake-build-debug/CMakeFiles/Rasterizer.dir
-C:/Users/Yezi/Desktop/Games101Homeworks/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Yezi/Desktop/Games101Homeworks/cmake-build-debug/CMakeFiles/rebuild_cache.dir
