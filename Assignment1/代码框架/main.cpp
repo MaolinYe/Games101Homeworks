@@ -1,38 +1,38 @@
 #include "Triangle.hpp"
 #include "rasterizer.hpp"
-#include "eigen/Eigen"
+#include "../../Eigen/Eigen"
 #include <iostream>
 #include "opencv2/opencv.hpp"
 
 constexpr double MY_PI = 3.1415926;
 
-Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
-{
+Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos) {
     Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
 
     Eigen::Matrix4f translate;
     translate << 1, 0, 0, -eye_pos[0], 0, 1, 0, -eye_pos[1], 0, 0, 1,
-        -eye_pos[2], 0, 0, 0, 1;
+            -eye_pos[2], 0, 0, 0, 1;
 
     view = translate * view;
 
     return view;
 }
 
-Eigen::Matrix4f get_model_matrix(float rotation_angle)
-{
+Eigen::Matrix4f get_model_matrix(float rotation_angle) {
     Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
 
     // TODO: Implement this function
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
-
+    model << cos(rotation_angle), -sin(rotation_angle), 0, 0,
+            sin(rotation_angle), cos(rotation_angle), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
     return model;
 }
 
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
-                                      float zNear, float zFar)
-{
+                                      float zNear, float zFar) {
     // Students will implement this function
 
     Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
@@ -40,12 +40,27 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
-
+    Eigen::Matrix4f perspective = Eigen::Matrix4f::Identity();
+    perspective << zNear, 0, 0, 0,
+            0, zNear, 0, 0,
+            0, 0, zNear + zFar, -zNear * zFar,
+            0, 0, 1, 0;
+    Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
+    float t=tan(eye_fov/2)*fabs(zNear);
+    float r=aspect_ratio*t;
+    float l=-r,b=-t;
+    transform(0,3)=-(r+l)/2;
+    transform(1,3)=-(t+b)/2;
+    transform(2,3)=-(zNear+zFar)/2;
+    Eigen::Matrix4f scale = Eigen::Matrix4f::Identity();
+    scale(0,0)=2/(r-l);
+    scale(1,1)=2/(t-b);
+    scale(2,2)=2/(zNear-zFar)/2;
+    projection=scale*transform*perspective;
     return projection;
 }
 
-int main(int argc, const char** argv)
-{
+int main(int argc, const char **argv) {
     float angle = 0;
     bool command_line = false;
     std::string filename = "output.png";
@@ -55,8 +70,7 @@ int main(int argc, const char** argv)
         angle = std::stof(argv[2]); // -r by default
         if (argc == 4) {
             filename = std::string(argv[3]);
-        }
-        else
+        } else
             return 0;
     }
 
@@ -64,7 +78,9 @@ int main(int argc, const char** argv)
 
     Eigen::Vector3f eye_pos = {0, 0, 5};
 
-    std::vector<Eigen::Vector3f> pos{{2, 0, -2}, {0, 2, -2}, {-2, 0, -2}};
+    std::vector<Eigen::Vector3f> pos{{2,  0, -2},
+                                     {0,  2, -2},
+                                     {-2, 0, -2}};
 
     std::vector<Eigen::Vector3i> ind{{0, 1, 2}};
 
@@ -108,8 +124,7 @@ int main(int argc, const char** argv)
 
         if (key == 'a') {
             angle += 10;
-        }
-        else if (key == 'd') {
+        } else if (key == 'd') {
             angle -= 10;
         }
     }
