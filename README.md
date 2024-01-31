@@ -31,4 +31,4 @@ zNear, float zFar): 使用给定的参数逐个元素地构建透视投影矩阵
 先做透视投影，然后做正交投影，正交投影=平移+缩放  
 平移到原点，缩放到一个标准正方体[-1,1]³中  
 n 对应 zNear，f 对应 zFar，fovY 对应 eye_fov，aspect 对应 asoect_ratio  
-![img.png](img.png)
+![img.png](Assignment1/代码框架/img.png)
