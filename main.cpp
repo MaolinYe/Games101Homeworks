@@ -67,7 +67,13 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float z
     scale(0,0)=2/(r-l);
     scale(1,1)=2/(t-b);
     scale(2,2)=2/(zNear-zFar)/2;
-    projection=scale*transform*perspective;
+    Eigen::Matrix4f mirror;
+    mirror <<
+           -1, 0, 0, 0,
+            0, -1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+    projection=mirror*scale*transform*perspective;
     return projection;
 }
 
@@ -265,10 +271,10 @@ int main(int argc, const char** argv)
 
     std::string filename = "output.png";
     objl::Loader Loader;
-    std::string obj_path = "C:\\Users\\v_maolinye\\CLionProjects\\Games101Homeworks\\Assignment3\\Code\\models\\spot\\";
+    std::string obj_path = "C:\\Users\\Yezi\\Desktop\\Games101Homeworks\\Assignment3\\Code\\models\\spot\\";
 
     // Load .obj File
-    bool loadout = Loader.LoadFile("C:\\Users\\v_maolinye\\CLionProjects\\Games101Homeworks\\Assignment3\\Code\\models\\spot\\spot_triangulated_good.obj");
+    bool loadout = Loader.LoadFile("C:\\Users\\Yezi\\Desktop\\Games101Homeworks\\Assignment3\\Code\\models\\spot\\spot_triangulated_good.obj");
     for(auto mesh:Loader.LoadedMeshes)
     {
         for(int i=0;i<mesh.Vertices.size();i+=3)
