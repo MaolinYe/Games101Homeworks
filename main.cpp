@@ -1,6 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-
+#include "Eigen/Eigen"
 #include "global.hpp"
 #include "rasterizer.hpp"
 #include "Triangle.hpp"
@@ -50,7 +50,25 @@ Eigen::Matrix4f get_model_matrix(float angle)
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
 {
     // TODO: Use the same projection matrix from the previous assignments
-
+    Eigen::Matrix4f projection;
+    Eigen::Matrix4f perspective = Eigen::Matrix4f::Identity();
+    perspective << zNear, 0, 0, 0,
+            0, zNear, 0, 0,
+            0, 0, zNear + zFar, -zNear * zFar,
+            0, 0, 1, 0;
+    Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
+    float t=tan(eye_fov/2*MY_PI/180)*fabs(zNear);
+    float r=aspect_ratio*t;
+    float l=-r,b=-t;
+    transform(0,3)=-(r+l)/2;
+    transform(1,3)=-(t+b)/2;
+    transform(2,3)=-(zNear+zFar)/2;
+    Eigen::Matrix4f scale = Eigen::Matrix4f::Identity();
+    scale(0,0)=2/(r-l);
+    scale(1,1)=2/(t-b);
+    scale(2,2)=2/(zNear-zFar)/2;
+    projection=scale*transform*perspective;
+    return projection;
 }
 
 Eigen::Vector3f vertex_shader(const vertex_shader_payload& payload)
@@ -247,10 +265,10 @@ int main(int argc, const char** argv)
 
     std::string filename = "output.png";
     objl::Loader Loader;
-    std::string obj_path = "../models/spot/";
+    std::string obj_path = "C:\\Users\\v_maolinye\\CLionProjects\\Games101Homeworks\\Assignment3\\Code\\models\\spot\\";
 
     // Load .obj File
-    bool loadout = Loader.LoadFile("../models/spot/spot_triangulated_good.obj");
+    bool loadout = Loader.LoadFile("C:\\Users\\v_maolinye\\CLionProjects\\Games101Homeworks\\Assignment3\\Code\\models\\spot\\spot_triangulated_good.obj");
     for(auto mesh:Loader.LoadedMeshes)
     {
         for(int i=0;i<mesh.Vertices.size();i+=3)
@@ -271,7 +289,7 @@ int main(int argc, const char** argv)
     auto texture_path = "hmap.jpg";
     r.set_texture(Texture(obj_path + texture_path));
 
-    std::function<Eigen::Vector3f(fragment_shader_payload)> active_shader = phong_fragment_shader;
+    std::function<Eigen::Vector3f(fragment_shader_payload)> active_shader = normal_fragment_shader;
 
     if (argc >= 2)
     {

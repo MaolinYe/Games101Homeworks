@@ -4,13 +4,12 @@
 
 #pragma once
 
-#include <eigen3/Eigen/Eigen>
 #include <optional>
 #include <algorithm>
 #include "global.hpp"
 #include "Shader.hpp"
 #include "Triangle.hpp"
-
+#include "Eigen/Eigen"
 using namespace Eigen;
 
 namespace rst
