@@ -4,6 +4,7 @@
 #include "rasterizer.hpp"
 #include "global.hpp"
 #include "Triangle.hpp"
+#include "../../Eigen/Core"
 
 constexpr double MY_PI = 3.1415926;
 
@@ -32,7 +33,23 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float z
 {
     // TODO: Copy-paste your implementation from the previous assignment.
     Eigen::Matrix4f projection;
-
+    Eigen::Matrix4f perspective = Eigen::Matrix4f::Identity();
+    perspective << zNear, 0, 0, 0,
+            0, zNear, 0, 0,
+            0, 0, zNear + zFar, -zNear * zFar,
+            0, 0, 1, 0;
+    Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
+    float t=tan(eye_fov/2)*fabs(zNear);
+    float r=aspect_ratio*t;
+    float l=-r,b=-t;
+    transform(0,3)=-(r+l)/2;
+    transform(1,3)=-(t+b)/2;
+    transform(2,3)=-(zNear+zFar)/2;
+    Eigen::Matrix4f scale = Eigen::Matrix4f::Identity();
+    scale(0,0)=2/(r-l);
+    scale(1,1)=2/(t-b);
+    scale(2,2)=2/(zNear-zFar)/2;
+    projection=scale*transform*perspective;
     return projection;
 }
 

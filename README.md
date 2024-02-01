@@ -32,3 +32,18 @@ zNear, float zFar): 使用给定的参数逐个元素地构建透视投影矩阵
 平移到原点，缩放到一个标准正方体[-1,1]³中  
 n 对应 zNear，f 对应 zFar，fovY 对应 eye_fov，aspect 对应 asoect_ratio  
 ![img.png](Assignment1/代码框架/img.png)
+## Assignment2 光栅化三角形
+### 判断点是否在三角形内
+static bool insideTriangle(): 测试点是否在三角形内。
+#### 思路
+叉乘可以用来判断一个点是否在一个多边形内部，如P点，如果AP×AB和BP×BC和CP×CA的方向是一样的，那么这个P点就在三角形内部
+### 光栅化三角形
+rasterize_triangle()
+#### 思路
+先建立起一个矩形框框住三角形  
+遍历矩形框内每个像素，判断该像素是否在三角形内  
+如果在三角形内，插值计算深度，更新depth buffer  
+渲染该像素
+![img.png](Assignment2/代码框架/img.png)
+三角形颠倒问题  
+https://zhuanlan.zhihu.com/p/509902950
