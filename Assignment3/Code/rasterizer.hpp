@@ -9,7 +9,7 @@
 #include "global.hpp"
 #include "Shader.hpp"
 #include "Triangle.hpp"
-#include "Eigen/Eigen"
+#include "../../Eigen/Eigen"
 using namespace Eigen;
 
 namespace rst

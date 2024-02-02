@@ -6,7 +6,7 @@
 #include "rasterizer.hpp"
 #include <opencv2/opencv.hpp>
 #include <cmath>
-#include "Eigen/Eigen"
+#include "../../Eigen/Eigen"
 
 rst::pos_buf_id rst::rasterizer::load_positions(const std::vector<Eigen::Vector3f> &positions)
 {
