@@ -311,4 +311,4 @@ https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-
     Intersection hit2 = getIntersection(node->right, ray);
     return hit1.distance < hit2.distance ? hit1 : hit2;
 ```
-![img.png](Desktop/Games101Homeworks/Assignment6/img.png)
+![img.png](Assignment6/img.png)
