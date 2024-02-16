@@ -209,3 +209,106 @@ https://zhuanlan.zhihu.com/p/509902950
     point=point+kn * normal * h(u,v);
 ```
 ![img.png](Assignment3/Code/displacement.png)
+## Assignment4 贝塞尔曲线
+### bezier
+该函数实现绘制 Bézier 曲线的功能。它使用一个控制点序列和一个
+OpenCV：：Mat 对象作为输入，没有返回值。它会使 t 在 0 到 1 的范围内进
+行迭代，并在每次迭代中使 t 增加一个微小值。对于每个需要计算的 t，将
+调用另一个函数 recursive_bezier，然后该函数将返回在 Bézier 曲线上 t
+处的点。最后，将返回的点绘制在 OpenCV ：：Mat 对象上
+```c++
+    for (double t = 0.0; t <= 1.0; t += 0.001) {
+        auto point = recursive_bezier(control_points, t);
+        window.at<cv::Vec3b>(point.y, point.x)[1] = 255;
+    }
+```
+### De Casteljau 算法
+1. 考虑一个 p0, p1, ... pn 为控制点序列的 Bézier 曲线。首先，将相邻的点连接起来以形成线段。
+2. 用 t : (1 − t) 的比例细分每个线段，并找到该分割点。
+3. 得到的分割点作为新的控制点序列，新序列的长度会减少一。
+4. 如果序列只包含一个点，则返回该点并终止。否则，使用新的控制点序列并转到步骤 1。
+```c++
+    if (control_points.size() == 1)
+        return control_points[0];
+    std::vector<cv::Point2f> points;
+    for (int i = 0; i < control_points.size() - 1; i++) {
+        int x = (1 - t) * control_points[i].x + t * control_points[i + 1].x;
+        int y = (1 - t) * control_points[i].y + t * control_points[i + 1].y;
+        points.emplace_back(x, y);
+    }
+    return recursive_bezier(points, t);
+```
+![img.png](Assignment4/code/img.png)
+## Assignment5 光线与三角形相交
+### 生成相机光线
+目标是找出光线的方向，简单来说是每个像素中心和相机位置连线的方向，由于相机在原点，那么像素中心的位置就是光线的方向  
+现有的（i，j）是raster space，也就是显示的屏幕窗口坐标，但我们要的是最后的世界坐标，MVP变换我们把所有的物体都放在了一个[-1,1]³正方体里面，然后正交投影到[-1,1]²平面上，所以这里需要进行一个坐标的变换，找出像素中心在世界坐标系中的变换  
+为了方便计算，首先变换到NDC空间（Normalized Device Coordinates，归一化设备坐标），然后变换到[-1,1]²  
+再恢复宽高比，由于相机到成像平面有一个单位距离，因此需要利用视角的正切值换算一下  
+![img.png](Assignment5/Code/space.png)![img.png](Assignment5/Code/ratio.png)![img.png](Assignment5/Code/aspect.png)  
+```c++
+            x=(2*(i+0.5)/scene.width-1)*scale*imageAspectRatio;
+            y=(1-2*(j+0.5)/scene.height)*scale;
+            Vector3f dir = Vector3f(x, y, -1); // Don't forget to normalize this direction!
+            dir= normalize(dir);
+            framebuffer[m++] = castRay(eye_pos, dir, scene, 0);
+```
+参考  
+https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-camera-rays/generating-camera-rays.html
+### 找出光线与物体交点
+使用Möller Trumbore Algorithm（MT算法）通过三角形的重心坐标来计算，这里用的是线性代数的克莱姆法则解线性方程组，这里需要注意精度问题，如果直接使用1-b1-b2>=0会出现蓝点，然后将这个判断范围放大一点可以解决问题，但是如果放的过大，地面会显示多出两个三角形
+```c++
+    auto E1=v1-v0;
+    auto E2=v2-v0;
+    auto S=orig-v0;
+    auto S1= crossProduct(dir,E2);
+    auto S2= crossProduct(S,E1);
+    auto S1E1= dotProduct(S1,E1);
+    tnear= dotProduct(S2,E2)/S1E1;
+    u= dotProduct(S1,S)/S1E1;
+    v= dotProduct(S2,dir)/S1E1;
+    if(tnear>=0&&u>=0&&v>=0&&u+v<=1.00001)
+        return true;
+    return false;
+```
+![img.png](Assignment5/Code/img.png)
+## Assignment6 物体划分算法 Bounding Volume Hierarchy (BVH) 加速光线追踪
+#### 复用上次作业的 Render（）,这里将光线封装成了Ray类
+```c++
+            Vector3f dir = Vector3f(x, y, -1); // Don't forget to normalize this direction!
+            dir= normalize(dir);
+            framebuffer[m++] = scene.castRay(Ray(eye_pos, dir), 0);
+```
+#### 复用上次作业的 Triangle::getIntersection，这里将交点封装成了Intersection结构体，是否相交happened、交点坐标coords、交点法向量normal、交点与相机距离distance，相交物体obj，材质m
+```c++
+    inter.happened= true;
+    inter.coords=ray.origin+t_tmp*ray.direction;
+    inter.normal=this->normal;
+    inter.distance=t_tmp;
+    inter.m=this->m;
+    inter.obj=this;
+```
+### 判断包围盒与光线是否相交
+用两个相交点的坐标计算出光线进入和出来的时间，取三维中最晚进入的时间和最早出来的时间
+```c++
+    Vector3f t1 = (pMin - ray.origin) * invDir;
+    Vector3f t2 = (pMax - ray.origin) * invDir;
+    Vector3f tMin = Vector3f::Min(t1, t2);
+    Vector3f tMax = Vector3f::Max(t1, t2);
+    auto tEnter=std::max(tMin.x,std::max(tMin.y,tMin.z));
+    auto tExit=std::min(tMax.x,std::min(tMax.y,tMax.z));
+    return tEnter<tExit&&tExit>=0;
+```
+### BVH加速
+利用建好的BVH树，如果是没有包围盒或者和包围盒没有交点就返回，如果已经递归到了叶子节点就计算与里面物体的交点，不然就继续递归计算左右两个子节点返回最近的交点
+```c++
+    Intersection intersection;
+    if (node == nullptr || !node->bounds.IntersectP(ray, ray.direction_inv, {0, 0, 0}))
+        return intersection;
+    if (node->left == nullptr && node->right == nullptr)
+        return node->object->getIntersection(ray);
+    Intersection hit1 = getIntersection(node->left, ray);
+    Intersection hit2 = getIntersection(node->right, ray);
+    return hit1.distance < hit2.distance ? hit1 : hit2;
+```
+![img.png](Assignment6/PA6/Assignment6/img.png)
