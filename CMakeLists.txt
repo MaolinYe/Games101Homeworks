@@ -3,6 +3,7 @@ project(RayTracing)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(RayTracing Assignment6/main.cpp Assignment6/Object.hpp Assignment6/Vector.cpp Assignment6/Vector.hpp Assignment6/Sphere.hpp Assignment6/global.hpp Assignment6/Triangle.hpp Assignment6/Scene.cpp
-        Assignment6/Scene.hpp Assignment6/Light.hpp Assignment6/AreaLight.hpp Assignment6/BVH.cpp Assignment6/BVH.hpp Assignment6/Bounds3.hpp Assignment6/Ray.hpp Assignment6/Material.hpp Assignment6/Intersection.hpp
-        Assignment6/Renderer.cpp Assignment6/Renderer.hpp)
+add_executable(RayTracing Assignment7/main.cpp Assignment7/Object.hpp Assignment7/Vector.cpp Assignment7/Vector.hpp Assignment7/Sphere.hpp Assignment7/global.hpp Assignment7/Triangle.hpp Assignment7/Scene.cpp
+        Assignment7/Scene.hpp Assignment7/Light.hpp Assignment7/AreaLight.hpp Assignment7/BVH.cpp Assignment7/BVH.hpp Assignment7/Bounds3.hpp Assignment7/Ray.hpp Assignment7/Material.hpp Assignment7/Intersection.hpp
+        Assignment7/Renderer.cpp Assignment7/Renderer.hpp)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fopenmp")

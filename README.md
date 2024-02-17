@@ -312,3 +312,64 @@ https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-
     return hit1.distance < hit2.distance ? hit1 : hit2;
 ```
 ![img.png](Assignment6/img.png)
+## Assignment7 路径追踪
+### 路径追踪
+如果这条光线没交点就直接返回  
+
+如果这条光线打到光源直接返回光源材质的发光，这里不考虑弹射光线打到光源导致光累积的错误情况，因为后面不往光源弹射就行  
+着色点的着色效果来源于光源直接照射和物体反射  
+
+对于光源直接照射的部分，直接对场景中的光源按面积进行采样，根据采样点的概率密度用蒙特卡洛积分计算，这里需要注意判断采样点与着色点之间是否存在物体遮挡，可以从采样点发出光线找到与场景的交点，如果这个相交的距离和采样点与着色点的距离相差无几说明无遮挡
+
+对于物体反射，即间接光照的部分，以俄罗斯轮盘赌的概率继续弹射光线，根据着色点的材质确定弹射方向，如果有弹射到的物体并且弹射到的不是光源，那么根据渲染方程计算该间接光照的效果  
+  
+注意判断与包围盒是否有交点的时候光线进入时间和出来时间相等也算，因为此时物体可能没有厚度
+```c++
+    return tEnter <= tExit && tExit >= 0;
+```
+注意如果效果较暗可能是因为精度问题误判光遮挡
+```c++
+Intersection shadingPoint=Scene::intersect(ray);
+    if(!shadingPoint.happened)
+        return {0,0,0};
+    if(shadingPoint.m->hasEmission())
+        return shadingPoint.m->getEmission();
+    Intersection lightPoint;
+    float pdf;
+    sampleLight(lightPoint,pdf);
+    auto lightDirection=(shadingPoint.coords-lightPoint.coords).normalized();
+    float lightDistance=intersect(Ray(lightPoint.coords,lightDirection)).distance;
+    float objDistance=(lightPoint.coords-shadingPoint.coords).norm();
+    Vector3f direct={0,0,0};
+    if(fabsf(lightDistance-objDistance)<0.001){ // 无物体遮挡光源
+        auto L_i=lightPoint.emit;
+        auto f_r=shadingPoint.m->eval(ray.direction,-lightDirection,shadingPoint.normal);
+        float cos= dotProduct(shadingPoint.normal,-lightDirection);
+        float cosPrime= dotProduct(lightPoint.normal,lightDirection);
+        direct=L_i*f_r*cos*cosPrime/(objDistance*objDistance)/pdf;
+    }
+    if(static_cast<float >(rand())/RAND_MAX>RussianRoulette)
+        return direct;
+    Vector3f indirect={0,0,0};
+    auto boundDirection=shadingPoint.m->sample(ray.direction,shadingPoint.normal).normalized();
+    auto boundRay=Ray(shadingPoint.coords,boundDirection);
+    auto boundPoint= intersect(boundRay);
+    if(boundPoint.happened&&!boundPoint.m->hasEmission()){
+        auto f_r=shadingPoint.m->eval(ray.direction,boundDirection,shadingPoint.normal);
+        float cos= dotProduct(shadingPoint.normal,boundDirection);
+        float pdf_hemi=shadingPoint.m->pdf(ray.direction,boundDirection,shadingPoint.normal);
+        indirect= castRay(boundRay,depth+1)*f_r*cos/pdf_hemi/RussianRoulette;
+    }
+    return direct+indirect;
+```
+SPP(samples per pixel)=1 39s 512x512 开启O3优化：6s  
+SPP=16 O3 75s 512x512 使用openMP并行加速：36s
+```c++
+#pragma omp parallel for
+            for (int k = 0; k < spp; k++){
+                framebuffer[m] += scene.castRay(Ray(eye_pos, dir), 0) / spp;
+            }
+```
+![img.png](Assignment7/spp_16_O3_openMP_37s.png)
+SPP=128 O3 openMP 98s 512x512
+![img.png](Assignment7/spp_128_O3_openMP_98s.png)
