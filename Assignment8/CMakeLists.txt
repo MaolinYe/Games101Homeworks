@@ -96,7 +96,6 @@ if(LINUX)
         set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -O3")
         set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -fopenmp")
     endif(BUILD_DEBUG)
-
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_CXX_FLAGS}")
 
   endif()

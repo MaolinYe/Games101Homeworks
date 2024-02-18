@@ -370,6 +370,85 @@ SPP=16 O3 75s 512x512 使用openMP并行加速：36s
                 framebuffer[m] += scene.castRay(Ray(eye_pos, dir), 0) / spp;
             }
 ```
-![img.png](Assignment7/spp_16_O3_openMP_37s.png)
-SPP=128 O3 openMP 98s 512x512
+![img.png](Assignment7/spp_16_O3_openMP_37s.png)  
+SPP=128 O3 openMP 98s 512x512  
 ![img.png](Assignment7/spp_128_O3_openMP_98s.png)
+## Assignment8 质点弹簧系统
+### 环境配置
+之前一直使用Windows+clion写作业，但是作业8的freetype配置clion无法搞定，改用wsl跑
+```shell
+sudo apt install g++ gdb cmake
+sudo apt install libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev
+```
+直接运行会出现segmentation fault，改用MobaXterm打开终端就可以了
+### 连接绳子的约束
+给绳子加上质点和弹簧
+```c++
+        for(int i=0;i<num_nodes;i++){
+            auto position=start+(end-start)*i/(num_nodes-1.0);
+            masses.push_back(new Mass(position,node_mass,false));
+        }
+        for(int i=0;i<num_nodes-1;i++){
+            springs.push_back(new Spring(masses[i],masses[i+1],k));
+        }
+        for (auto &i : pinned_nodes) {
+            masses[i]->pinned = true;
+        }
+```
+![img.png](Assignment8/img.png)
+### 显式欧拉
+使用胡克定律计算弹簧的弹力并累加到质点上
+```c++
+            auto length=(s->m1->position-s->m2->position).norm();
+            auto force=s->k*(s->m1->position-s->m2->position)/length*(length-s->rest_length);
+            s->m1->forces-=force;
+            s->m2->forces+=force;
+```
+使用此刻速度计算下一刻的位置
+```c++
+                auto a=m->forces/m->mass+gravity;
+                m->position+=m->velocity*delta_t;
+                m->velocity+=a*delta_t;
+```
+绳子会飞出去，显式欧拉具有不稳定性，步长无法赶上速度场的变化，偏差会持续累计
+### 半隐式欧拉
+先计算速度，使用下一刻的速度计算下一刻的位置
+```c++
+                auto a=m->forces/m->mass+gravity;
+                m->velocity+=a*delta_t;
+                m->position+=m->velocity*delta_t;
+```
+![implicitEuler.gif](Assignment8/implicitEuler.gif)
+### 显式 Verlet
+移动每个质点的位置使得弹簧的长度保持原长，每个质点应该移动位移的一半，考虑固定顶点的情况不移动另一个顶点如果不固定则移动整个位移
+```c++
+            auto ab=s->m2->position-s->m1->position;
+            auto direction=ab.unit();
+            auto length=ab.norm();
+            int a=1,b=1;
+            if(s->m1->pinned)
+                a=0;
+            if(s->m2->pinned)
+                b=0;
+            if(!a&&!b)
+                continue;
+            s->m1->position+=direction*(length-s->rest_length)*a/(a+b);
+            s->m2->position-=direction*(length-s->rest_length)*b/(a+b);
+```
+Verlet积分
+```c++
+                m->position=2*m->position-m->last_position+gravity*delta_t*delta_t;
+                m->last_position=temp_position;
+```
+![explicitVerlet.gif](Assignment8/explicitVerlet.gif)
+### 阻尼
+考虑部分能量因摩擦转化为内能导致动能减小
+#### Verlet 加阻尼
+```c++
+m->position=m->position+0.99995*(m->position-m->last_position)+gravity*delta_t*delta_t;
+```
+#### 欧拉加阻尼 f=kv
+```c++
+                auto a=(m->forces-0.005*m->velocity)/m->mass+gravity;
+```
+![damping.gif](Assignment8/damping.gif)
