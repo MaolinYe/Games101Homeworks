@@ -1,5 +1,6 @@
 # Games101Homeworks
-Games101‘s Homeworks
+学习内容涵盖MVP变换、光栅化成像、MSAA抗锯齿、深度缓冲、Blinn-Phong着色模型、平面着色、高洛德顶点着色、Phong像素着色、实时渲染管线、纹理映射、纹理应用（凹凸贴图、位移贴图）、几何表示、贝塞尔曲线、曲面、Shadow Mapping阴影映射、Whitted-Style光线追踪、BVH加速、渲染方程、路径追踪、材质、物理模拟与仿真  
+作业内容实现矩阵变换、深度缓冲、光栅化成像、插值、纹理映射、Blinn-Phong着色、凹凸贴图、位移贴图、贝塞尔曲线、Whitted-Style光线追踪、BVH加速、路径追踪、质点弹簧系统
 ## Assignment0 配置环境
 安装eigen即可
 ```c++
